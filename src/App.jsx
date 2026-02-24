@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
   Library, 
@@ -53,7 +53,7 @@ export default function App() {
   const [isUploading, setIsUploading] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  // Логика загрузки документа
+  // Логика загрузки документа + Aitu payload
   const handleUpload = () => {
     setIsUploading(true);
     
@@ -69,7 +69,29 @@ export default function App() {
         status: "Требует согласования"
       };
       
-      setDocuments([newDoc, ...documents]);
+      setDocuments(prev => [newDoc, ...prev]);
+
+      // --- Aitu payload: имитация риска по срокам ---
+      const aituPayload = {
+        type: "schedule_risk",
+        project: "Строительство АЭС (Блок 1)",
+        message:
+          'Обнаружен риск срыва сроков: задача "Экскавация котлована реактора" отстаёт от графика на 2 недели.',
+      };
+
+      // Демонстрационный вызов API Aitu.
+      // В реальном проекте здесь был бы настоящий endpoint Aitu.
+      fetch("https://example.com/aitu-mock", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(aituPayload),
+      }).catch((error) => {
+        // Чтобы не ломать демо, просто логируем ошибку
+        console.warn("Aitu mock call failed (expected in demo):", error);
+      });
+
       setShowToast(true);
       
       // Автоматически скрываем уведомление через 6 секунд
@@ -87,7 +109,7 @@ export default function App() {
             <ShieldAlert className="w-5 h-5 text-white" />
           </div>
           <span className="font-bold text-sm tracking-wide leading-tight text-slate-100">
-            Агентство РК по<br/>атомной энергии
+            Агентство РК по атомной энергии
           </span>
         </div>
 
@@ -343,7 +365,7 @@ export default function App() {
             <div className="flex-1">
               <h4 className="text-sm font-bold text-slate-900">Успешно</h4>
               <p className="text-sm text-slate-600 mt-1 leading-snug">
-                Документ загружен. API Aitu вызван для оповещения руководства.
+                Документ загружен. API Aitu вызван для оповещения о риске срыва сроков.
               </p>
             </div>
             <button 
